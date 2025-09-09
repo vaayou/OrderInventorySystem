@@ -1,0 +1,99 @@
+/*
+  App-wide custom styles for enhanced look and feel.
+  These styles complement Tailwind and Material UI for a modern, clean UI.
+*/
+
+body {
+  background: #f3f4f6;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+}
+
+h2, .MuiDialogTitle-root {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  font-weight: 700;
+}
+
+/* DataGrid customizations */
+.MuiDataGrid-root {
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+}
+.MuiDataGrid-columnHeaders {
+  background: #f1f5f9;
+  font-weight: 600;
+  font-size: 1rem;
+}
+.MuiDataGrid-cell {
+  font-size: 0.98rem;
+}
+.MuiDataGrid-row:hover {
+  background: #f9fafb;
+}
+
+/* Dialogs */
+.MuiDialog-paper {
+  border-radius: 1rem;
+}
+
+/* Buttons */
+.MuiButton-root {
+  border-radius: 0.5rem;
+  text-transform: none;
+  font-weight: 500;
+}
+
+/* Inputs */
+.MuiInputBase-root {
+  border-radius: 0.5rem;
+}
+
+/* Utility */
+.card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+  padding: 1.5rem;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+/* Futuristic Button */
+.futuristic-btn {
+  @apply text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10), 0 1.5px 6px 0 rgba(0,0,0,0.08);
+  letter-spacing: 0.03em;
+  font-size: 1.15rem;
+}
+.futuristic-btn:hover, .futuristic-btn:focus {
+  filter: brightness(1.15) drop-shadow(0 0 16px #fff8);
+  transform: translateY(-2px) scale(1.03) perspective(400px) rotateX(2deg);
+  box-shadow: 0 8px 32px 0 var(--tw-shadow-color,rgba(59,130,246,0.25));
+  outline: none;
+}
+.futuristic-btn::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle,rgba(255,255,255,0.12) 0%,rgba(255,255,255,0) 80%);
+  transform: translate(-50%,-50%);
+  z-index: 0;
+  pointer-events: none;
+}
+.futuristic-btn > * {
+  position: relative;
+  z-index: 1;
+}
+.futuristic-btn svg {
+  margin-right: 0.5rem;
+}
