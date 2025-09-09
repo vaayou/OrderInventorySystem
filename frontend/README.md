@@ -61,12 +61,55 @@ frontend/
 - Tailwind and Material UI can be customized via `tailwind.config.js` and theme overrides.
 
 ## Backend
-- See `/OrderInvertory` for the Spring Boot backend (controllers, entities, DTOs, etc).
-- The frontend expects the backend to be running on the same host or update API URLs in `src/api.js`.
+
+The backend for this project is a Spring Boot application using MySQL and JPA/Hibernate, designed to provide a robust RESTful API for all inventory and order management features. It is located in the `/OrderInvertory` directory at the root of this repository.
+
+### Key Features
+- **Spring Boot**: Modern Java backend framework for rapid development
+- **MySQL**: Relational database for persistent storage
+- **Spring Data JPA**: ORM for easy database access and entity management
+- **Lombok**: Reduces boilerplate code in Java classes
+- **RESTful Controllers**: Exposes endpoints for Customers, Products, Orders, Inventory, Shipments, and Stores
+- **DTOs**: Data Transfer Objects for efficient and secure API responses
+- **Service Layer**: Business logic separated from controllers
+- **Repository Layer**: JPA repositories for all entities
+
+### Structure
+```
+OrderInvertory/
+  src/main/java/com/vaayu/OrderInvertory/
+    controller/   # REST controllers (CustomerController, ProductController, etc)
+    dto/          # Data Transfer Objects for API responses
+    entity/       # JPA entities (Customer, Product, Order, etc)
+    repository/   # Spring Data JPA repositories
+    service/      # Business logic and service classes
+  src/main/resources/
+    application.properties  # DB config, server port, etc
+```
+
+### Example Endpoints
+- `GET /api/v1/customers` — List all customers
+- `POST /api/v1/customers` — Add a new customer
+- `PUT /api/v1/customers` — Update a customer
+- `DELETE /api/v1/customers/{id}` — Delete a customer
+- `GET /api/v1/orders` — List all orders
+- ...and similar endpoints for products, inventory, shipments, and stores
+
+### Running the Backend
+1. Configure your MySQL database in `OrderInvertory/src/main/resources/application.properties`.
+2. Build and run the Spring Boot app:
+   ```bash
+   cd OrderInvertory
+   ./mvnw spring-boot:run
+   ```
+3. The backend will be available at `http://localhost:8080` by default.
+
+---
+
+For more details, see the code and documentation in the `/OrderInvertory` directory.
 
 ## License
 MIT
 
 ---
 Built with ❤️ using React, Material UI, and Tailwind CSS.
-

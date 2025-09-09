@@ -99,7 +99,7 @@ export default function Shipments() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Shipments (Local Temp Data)</h2>
+        <h2 className="text-xl font-bold">Shipments</h2>
         <Button variant="contained" onClick={() => handleOpen()}>Add Shipment</Button>
       </div>
       <div style={{ height: 520, width: '100%' }}>

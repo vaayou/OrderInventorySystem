@@ -224,9 +224,9 @@ export default function Customers() {
           <Paper elevation={2} sx={{ background: 'rgba(250, 250, 250, 0.07)', borderRadius: '16px', p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, color: 'white', fontWeight: 700 }}>Search & Filters</Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
-              <TextField label="Search Email" value={searchEmail} onChange={e => setSearchEmail(e.target.value)} size="small" sx={{ minWidth: 180 }} />
+              <TextField label="Search Email" value={searchEmail} onChange={e => setSearchEmail(e.target.value)} size="small" sx={{ minWidth: 180,background: 'white',borderRadius: '10px' }} />
               <Button variant="outlined" onClick={handleSearchByEmail} sx={{ borderRadius: '8px', textTransform: 'none', color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>Search</Button>
-              <TextField label="Search Name" value={searchName} onChange={e => setSearchName(e.target.value)} size="small" sx={{ minWidth: 180 }} />
+              <TextField label="Search Name" value={searchName} onChange={e => setSearchName(e.target.value)} size="small" sx={{ minWidth: 180,background: 'white',borderRadius: '10px' }} />
               <Button variant="outlined" onClick={handleSearchByName} sx={{ borderRadius: '8px', textTransform: 'none', color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>Search</Button>
             </Stack>
           </Paper>
@@ -246,8 +246,8 @@ export default function Customers() {
             </Stack>
             <Divider sx={{ my: 3, borderColor: 'rgba(255,255,255,0.1)' }} />
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="end">
-              <TextField label="Min Orders" value={quantityRange.min} onChange={e => setQuantityRange(q => ({ ...q, min: e.target.value }))} size="small" type="number" sx={{ width: 120 }} />
-              <TextField label="Max Orders" value={quantityRange.max} onChange={e => setQuantityRange(q => ({ ...q, max: e.target.value }))} size="small" type="number" sx={{ width: 120 }} />
+              <TextField label="Min Orders" value={quantityRange.min} onChange={e => setQuantityRange(q => ({ ...q, min: e.target.value }))} size="small" type="number" sx={{ width: 120 ,background: 'white',borderRadius: '10px'}} />
+              <TextField label="Max Orders" value={quantityRange.max} onChange={e => setQuantityRange(q => ({ ...q, max: e.target.value }))} size="small" type="number" sx={{ width: 120 ,background: 'white',borderRadius: '10px'}} />
               <Button variant="outlined" onClick={handleOrderQuantityRange} sx={{ borderRadius: '8px', textTransform: 'none', color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>Filter by Order Qty</Button>
             </Stack>
           </Paper>

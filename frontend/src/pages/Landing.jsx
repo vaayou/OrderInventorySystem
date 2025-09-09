@@ -172,7 +172,7 @@ export default function Landing() {
         <Typography variant="h6" sx={{ textAlign: 'center', mb: 6, color: 'rgba(255,255,255,0.8)' }}>
           How It Works
         </Typography>
-        <Grid container spacing={4}>
+        <Grid container spacing={4} justifyContent="center" alignItems="center">
           {[
             {
               step: '1',
@@ -189,9 +189,8 @@ export default function Landing() {
               title: 'Deliver Smarter',
               desc: 'Automate invoices, track shipments, notify customers'
             },
-            
           ].map((step, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index} >
+            <Grid item xs={12} sm={6} md={3} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Chip
                   label={step.step}
@@ -305,7 +304,7 @@ export default function Landing() {
           ))}
         </Box>
         <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+          <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.8)', fontSize: '2rem' }}>
             👉 All plans include free setup, training, and support.
           </Typography>
         </Box>

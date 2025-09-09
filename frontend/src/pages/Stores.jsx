@@ -86,11 +86,13 @@ export default function Stores() {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
+        <Typography variant="h4" className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
+                    Stores
+                  </Typography>
       <Paper elevation={3} className="p-6 mb-6 bg-gradient-to-r from-blue-50 to-purple-100">
+
         <div className="flex justify-between items-center mb-4">
-          <Typography variant="h4" className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-            Stores (Temporary Local Data)
-          </Typography>
+
           <Button variant="contained" onClick={() => handleOpen()}>Add Store</Button>
         </div>
         <Typography variant="body2" className="mb-4 text-gray-600">
