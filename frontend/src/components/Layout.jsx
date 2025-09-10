@@ -92,6 +92,7 @@ export default function Layout() {
 					>
 						Order Inventory System
 					</Typography>
+					{/* hi */}
 					<Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
 						{navLinks.map((link) => {
 							const isActive = location.pathname.startsWith(link.to);
