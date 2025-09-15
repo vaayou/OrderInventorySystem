@@ -1,0 +1,16 @@
+target/
+!target/*.jar
+*.log
+.git
+.gitignore
+README.md
+.DS_Store
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+
