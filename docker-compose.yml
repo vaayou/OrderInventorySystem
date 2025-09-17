@@ -1,18 +1,14 @@
+
 services:
   mysql:
     image: mysql:8.0
     container_name: order-inventory-db
     restart: unless-stopped
     environment:
-<<<<<<< HEAD
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: order_inventory
-=======
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: db
       MYSQL_USER: app_user
       MYSQL_PASSWORD: root
->>>>>>> 746bd45cf90190f1110679e2a3d82d132a980f03
     ports:
       - "3306:3306"
     volumes:
@@ -20,7 +16,7 @@ services:
     networks:
       - order-inventory-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uapp_user", "-proot"]
       timeout: 20s
       retries: 10
       interval: 30s
@@ -33,13 +29,8 @@ services:
     container_name: order-inventory-backend
     restart: unless-stopped
     environment:
-<<<<<<< HEAD
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/order_inventory?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-=======
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: app_user
->>>>>>> 746bd45cf90190f1110679e2a3d82d132a980f03
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
