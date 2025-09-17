@@ -30,7 +30,7 @@ services:
     container_name: order-inventory-backend
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/order_inventory?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: app_user
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
