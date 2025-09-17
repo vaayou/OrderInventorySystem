@@ -1,14 +1,11 @@
 services:
-  # MySQL Database
   mysql:
     image: mysql:8.0
     container_name: order-inventory-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: order_inventory
-      MYSQL_USER: app_user
-      MYSQL_PASSWORD: app_password
     ports:
       - "3306:3306"
     volumes:
@@ -16,13 +13,12 @@ services:
     networks:
       - order-inventory-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       timeout: 20s
       retries: 10
       interval: 30s
       start_period: 30s
 
-  # Backend Spring Boot Application
   backend:
     build:
       context: ./OrderInvertory
@@ -31,8 +27,8 @@ services:
     restart: unless-stopped
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/order_inventory?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: app_user
-      SPRING_DATASOURCE_PASSWORD: app_password
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: true
@@ -47,13 +43,12 @@ services:
     networks:
       - order-inventory-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/customers", "||", "exit", "1"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 60s
+      start_period: 120s
 
-  # Frontend React Application
   frontend:
     build:
       context: ./frontend
@@ -68,8 +63,8 @@ services:
     networks:
       - order-inventory-network
     environment:
-      - NODE_ENV=production
-      - REACT_APP_API_URL=http://localhost:8080
+      NODE_ENV: production
+      REACT_APP_API_URL: http://backend:8080
 
 volumes:
   mysql_data:

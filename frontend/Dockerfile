@@ -1,6 +1,6 @@
 # Frontend Dockerfile
 # Use official Node.js runtime as base image
-FROM node:18-alpine as build
+FROM node:18-alpine AS build
 
 # Set working directory
 WORKDIR /app
