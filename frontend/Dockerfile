@@ -1,21 +1,17 @@
-# Frontend Dockerfile for React development server (Vite)
-# Use official Node.js runtime as base image
-FROM node:22-alpine
-
-# Set working directory
+# Frontend Dockerfile for production build with Vite and nginx
+FROM node:20-alpine AS build
 WORKDIR /app
-
-# Copy package.json and package-lock.json (if available)
 COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy source code
+RUN npm ci --silent
 COPY . .
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+RUN npm run build
 
-# Expose port 5173
-EXPOSE 5173
-
-# Run the development server
-CMD ["npm", "run", "dev", "--", "--host"]
+FROM nginx:alpine
+# copy custom nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+# copy built app (Vite outputs to /dist)
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

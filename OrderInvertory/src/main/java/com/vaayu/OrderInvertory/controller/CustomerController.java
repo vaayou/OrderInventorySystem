@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping("/api/v1/customers")
+@RequestMapping({"/api/v1/customers", "/v1/customers"})
 public class CustomerController {
     @Autowired
     private CustomerService customerService;
@@ -153,4 +153,3 @@ public class CustomerController {
         }
     }
 }
-
