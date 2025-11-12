@@ -69,7 +69,9 @@ services:
     depends_on:
       - mysql
     networks:
-      - order-inventory-network
+      order-inventory-network:
+        aliases:
+          - order-inventory-backend
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
       interval: 30s

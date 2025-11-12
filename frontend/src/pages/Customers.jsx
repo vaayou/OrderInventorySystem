@@ -111,7 +111,7 @@ export default function Customers() {
       if (editing) {
         await api.put('/api/v1/customers', { ...editing, ...form, customerId: editing.customerId });
         notify('Customer updated');
-      } else {
+      }  else {
         await api.post('/api/v1/customers', form);
         notify('Customer created');
       }
