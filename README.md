@@ -13,6 +13,8 @@ A production-ready, full-stack Order & Inventory Management System featuring a m
 | **API Health Check** | **Render** | [https://orderinventorysystem-1y9i.onrender.com/api/health](https://orderinventorysystem-1y9i.onrender.com/api/health) |
 | **Database** | **Aiven** | Cloud-managed MySQL (SSL / TLS Encrypted) |
 | **Low-Level Design (LLD)** | **Notion** | [View LLD on Notion](https://foil-poinsettia-75d.notion.site/Order-Inventory-74bdd4829f9f4e41a25a510e7c5dd6f8) |
+| **Low-Level Design (LLD)** | **Notion** | [View LLD on Notion](https://foil-poinsettia-75d.notion.site/Order-Inventory-74bdd4829f9f4e41a25a510e7c5dd6f8) |
+
 
 ---
 
