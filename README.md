@@ -1,173 +1,170 @@
-# Order Inventory System (Frontend)
+# Order Inventory System
 
-A modern, full-featured React + Vite + Tailwind CSS + Material UI frontend for managing customers, products, orders, inventory, shipments, and stores. Designed to work seamlessly with a Spring Boot + MySQL backend.
+A production-ready, full-stack Order & Inventory Management System featuring a modern React frontend, a resilient Spring Boot RESTful backend, and a cloud-managed MySQL database with TLS/SSL encryption.
 
-## Features
-- Beautiful, responsive dashboard layout with navigation bar
-- Customer, Product, Order, Inventory, Shipment, and Store management
-- Advanced search, filter, and quick actions for customers
-- Data tables with sorting, paging, and actions (edit, delete, view details)
-- Modern UI using Material UI and Tailwind CSS
-- Fluid grid layout for feature panels and data tables
-- Works with RESTful Spring Boot backend (see backend folder)
+---
 
-## Tech Stack
-- [React](https://react.dev/)
-- [Vite](https://vitejs.dev/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Material UI](https://mui.com/)
-- [@mui/x-data-grid](https://mui.com/x/react-data-grid/)
-- [Axios](https://axios-http.com/) (via `src/api.js`)
+## 🚀 Live Working Project
 
-## Getting Started
+| Service | Hosting Provider | Live URL |
+| :--- | :--- | :--- |
+| **Frontend Application** | **Netlify** | [https://ordermanage7.netlify.app/](https://ordermanage7.netlify.app/) |
+| **Backend REST API** | **Render** | [https://orderinventorysystem-1y9i.onrender.com](https://orderinventorysystem-1y9i.onrender.com) |
+| **API Health Check** | **Render** | [https://orderinventorysystem-1y9i.onrender.com/api/health](https://orderinventorysystem-1y9i.onrender.com/api/health) |
+| **Database** | **Aiven** | Cloud-managed MySQL (SSL / TLS Encrypted) |
+
+---
+
+## 🏗️ Architecture & Deployment
+
+The application is architected as a decoupled, multi-cloud system:
+
+```mermaid
+graph LR
+    User[End User / Browser] -->|HTTPS| Netlify[Netlify<br/>React + Vite Frontend<br/>ordermanage7.netlify.app]
+    Netlify -->|REST API over CORS| Render[Render.com<br/>Spring Boot Container<br/>orderinventorysystem-1y9i.onrender.com]
+    Render -->|JDBC over TLS/SSL VERIFY_CA| Aiven[(Aiven Cloud<br/>MySQL Database)]
+```
+
+### 1. Frontend Deployment — Netlify
+- **Platform**: [Netlify](https://www.netlify.com/)
+- **Live URL**: `https://ordermanage7.netlify.app/`
+- **Build Settings**:
+  - **Base directory**: `frontend`
+  - **Build command**: `npm run build`
+  - **Publish directory**: `frontend/dist` (or `dist` if root is set to `frontend`)
+- **Environment Variables**:
+  ```env
+  VITE_API_URL=https://orderinventorysystem-1y9i.onrender.com
+  ```
+- **SPA Routing Configuration**:
+  - A `_redirects` file is included in `frontend/public/` to prevent 404 errors on browser page reloads:
+    ```text
+    /*    /index.html   200
+    ```
+
+---
+
+### 2. Backend Deployment — Render
+- **Platform**: [Render](https://render.com/)
+- **Live URL**: `https://orderinventorysystem-1y9i.onrender.com`
+- **Service Type**: Web Service (Docker)
+- **Deployment Details**:
+  - **Root Directory**: `OrderInvertory`
+  - **Dockerfile**: `OrderInvertory/Dockerfile`
+  - Multi-stage Docker build with Eclipse Temurin Java 21 and Maven 3.9.
+  - Dynamically binds to Render's injected `$PORT` environment variable (`server.port: ${PORT:8080}`).
+  - **CORS Handling**: Configured with `allowedOriginPatterns("*")` and a high-precedence `CorsFilter` to support cross-origin requests from Netlify and local environments seamlessly.
+- **Environment Variables (Render Dashboard → Environment)**:
+  ```env
+  SPRING_DATASOURCE_URL=jdbc:mysql://<AIVEN_HOST>:<AIVEN_PORT>/db?sslMode=VERIFY_CA&serverTimezone=UTC&allowPublicKeyRetrieval=true
+  SPRING_DATASOURCE_USERNAME=avnadmin
+  SPRING_DATASOURCE_PASSWORD=<AIVEN_PASSWORD>
+  CORS_ALLOWED_ORIGINS=*
+  ```
+
+---
+
+### 3. Database — Aiven for MySQL
+- **Platform**: [Aiven Cloud](https://aiven.io/)
+- **Database Engine**: MySQL 8.x
+- **Security & SSL/TLS Configuration**:
+  - Enforced SSL mode: `sslMode=VERIFY_CA`.
+  - The public Aiven CA certificate (`ca.pem`) is baked into the Docker image's JVM truststore (`cacerts`) at build time via `keytool`:
+    ```dockerfile
+    COPY ssl/ca.pem /tmp/aiven-ca.pem
+    RUN keytool -importcert -noprompt -alias aiven-ca \
+        -file /tmp/aiven-ca.pem \
+        -keystore "${JAVA_HOME}/lib/security/cacerts" \
+        -storepass changeit && rm /tmp/aiven-ca.pem
+    ```
+  - This eliminates runtime secret-mounting dependencies and ensures zero connection failures during auto-deploys.
+
+---
+
+## ✨ Features
+
+- **Dashboard**: High-level metrics, summary cards, and quick navigation.
+- **Customer Management**: Complete CRUD, search by email/name wildcard, shipment status counts, and order histories.
+- **Product Catalog**: View products, pricing, and category categorization.
+- **Order Processing**: View, track, and filter customer orders and fulfillment statuses.
+- **Inventory Tracking**: Stock levels across multiple fulfillment stores and warehouse locations.
+- **Shipments**: Track shipment states (Pending, Shipped, Delivered, Overdue).
+- **Responsive UI**: Built with Material UI and Tailwind CSS for mobile, tablet, and desktop views.
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **Framework**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **UI Components**: [Material UI (MUI v7)](https://mui.com/)
+- **Data Tables**: [@mui/x-data-grid](https://mui.com/x/react-data-grid/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) + Emotion
+- **Routing**: [React Router DOM v7](https://reactrouter.com/)
+
+### Backend
+- **Framework**: [Spring Boot 3.5](https://spring.io/projects/spring-boot)
+- **Language**: Java 21
+- **Persistence**: Spring Data JPA & Hibernate
+- **Database Driver**: MySQL Connector/J
+- **API Documentation**: SpringDoc OpenAPI / Swagger UI
+
+---
+
+## 📡 Key REST API Endpoints
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/health` | Service health status |
+| `GET` | `/api/v1/customers` | Fetch all customers |
+| `POST` | `/api/v1/customers` | Create a new customer record |
+| `PUT` | `/api/v1/customers` | Update an existing customer record |
+| `DELETE` | `/api/v1/customers/{id}` | Delete a customer record |
+| `GET` | `/api/v1/customers/{email}` | Search customer by email |
+| `GET` | `/api/v1/customers/name/{name}` | Search customer by name |
+| `GET` | `/api/v1/customers/{id}/order` | Get customer with order details |
+| `GET` | `/api/v1/customers/{id}/shipment` | Get customer shipment history |
+| `GET` | `/api/v1/customers/shipments/pending` | Fetch customers with pending shipments |
+| `GET` | `/api/v1/customers/shipments/overdue` | Fetch customers with overdue shipments |
+| `GET` | `/api/v1/orders` | Fetch all orders |
+| `GET` | `/api/v1/products` | Fetch product catalog |
+| `GET` | `/api/v1/inventory` | Fetch inventory stock levels |
+
+---
+
+## 💻 Local Development Setup
 
 ### Prerequisites
-- Node.js (v18+ recommended)
-- Backend API running (see `/OrderInvertory` Spring Boot project)
+- Node.js (v18+)
+- Java JDK 21
+- Docker & Docker Compose (optional for local containerization)
 
-### Installation
+### 1. Run Backend Locally
+```bash
+cd OrderInvertory
+./mvnw clean spring-boot:run
+```
+The backend starts on `http://localhost:8080`.
+
+### 2. Run Frontend Locally
 ```bash
 cd frontend
 npm install
-```
-
-### Development
-```bash
 npm run dev
 ```
-Visit [http://localhost:5173](http://localhost:5173) in your browser.
+Visit `http://localhost:5173` in your browser.
 
-### Build for Production
+### 3. Run Everything with Docker Compose
 ```bash
-npm run build
+# Copy and configure environment variables
+cp .env.example .env
+
+# Start containers
+docker compose up --build -d
 ```
-
-## Project Structure
-```
-frontend/
-  src/
-    api.js           # Axios API instance
-    App.jsx          # Main app and routes
-    App.css          # Custom styles
-    components/
-      Layout.jsx     # Main layout and navigation
-    pages/
-      Customers.jsx  # Customer management UI
-      ...            # Other entity pages
-```
-
-## Customization
-- Edit `src/pages/Customers.jsx` and other pages to adjust features or UI.
-- Tailwind and Material UI can be customized via `tailwind.config.js` and theme overrides.
-
-## Backend
-
-The backend for this project is a Spring Boot application using MySQL and JPA/Hibernate, designed to provide a robust RESTful API for all inventory and order management features. It is located in the `/OrderInvertory` directory at the root of this repository.
-
-### Key Features
-- **Spring Boot**: Modern Java backend framework for rapid development
-- **MySQL**: Relational database for persistent storage
-- **Spring Data JPA**: ORM for easy database access and entity management
-- **Lombok**: Reduces boilerplate code in Java classes
-- **RESTful Controllers**: Exposes endpoints for Customers, Products, Orders, Inventory, Shipments, and Stores
-- **DTOs**: Data Transfer Objects for efficient and secure API responses
-- **Service Layer**: Business logic separated from controllers
-- **Repository Layer**: JPA repositories for all entities
-
-### Structure
-```
-OrderInvertory/
-  src/main/java/com/vaayu/OrderInvertory/
-    controller/   # REST controllers (CustomerController, ProductController, etc)
-    dto/          # Data Transfer Objects for API responses
-    entity/       # JPA entities (Customer, Product, Order, etc)
-    repository/   # Spring Data JPA repositories
-    service/      # Business logic and service classes
-  src/main/resources/
-    application.properties  # DB config, server port, etc
-```
-
-### Example Endpoints
-- `GET /api/v1/customers` — List all customers
-- `POST /api/v1/customers` — Add a new customer
-- `PUT /api/v1/customers` — Update a customer
-- `DELETE /api/v1/customers/{id}` — Delete a customer
-- `GET /api/v1/orders` — List all orders
-- ...and similar endpoints for products, inventory, shipments, and stores
-
-### Running the Backend
-1. Configure your MySQL database in `OrderInvertory/src/main/resources/application.properties`.
-2. Build and run the Spring Boot app:
-   ```bash
-   cd OrderInvertory
-   ./mvnw spring-boot:run
-   ```
-3. The backend will be available at `http://localhost:8080` by default.
-
-check## Docker & Production Deployment
-
-1) Prepare environment file
-
-- Copy example and edit secrets:
-  - cp .env.prod.example .env.prod
-  - Update MYSQL passwords, REACT_APP_API_URL (set to empty or `/api` if using nginx proxy), and ports.
-
-2) Build and run with Docker Compose (local or on a server)
-
-- Build and start (detached):
-  - docker compose -f docker-compose.yml up --build -d
-  - For the production compose file (if present):
-    - docker compose -f docker-compose.prod.yml up --build -d
-
-3) Rebuild frontend to use relative API path (recommended)
-
-- Ensure REACT_APP_API_URL is empty or set to `/api` before building frontend. Example (build locally):
-  - cd frontend
-  - REACT_APP_API_URL="" npm run build
-
-4) Push images to Docker Hub
-
-- Build and tag images (example names):
-  - docker build -t <yourhubuser>/order-inventory-backend:latest -f OrderInvertory/Dockerfile .
-  - docker build -t <yourhubuser>/order-inventory-frontend:latest -f frontend/Dockerfile frontend
-
-- Login and push:
-  - docker login
-  - docker push <yourhubuser>/order-inventory-backend:latest
-  - docker push <yourhubuser>/order-inventory-frontend:latest
-
-5) Run on EC2
-
-- Options:
-  - EC2 (simple): Provision an EC2 instance, install Docker and Docker Compose, copy repository or pull images from Docker Hub, then run `docker compose up -d`.
-  - Use an AMI with Docker preinstalled or follow `setup-amazon-linux.sh` in this repo.
-- Remember to open required security group ports (80, 443, 8080 if exposing backend directly, and 3306 only if you need DB access externally — avoid exposing MySQL publicly).
-
-6) Exec into MySQL container
-
-- Use Docker Compose to open a shell in the running DB container and run mysql client:
-  - docker compose exec mysql bash
-  - mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
-
-- Alternatively, run mysql client directly from host (mapped port 3307 by compose):
-  - mysql -h127.0.0.1 -P3307 -uapp_user -proot db
-
-7) Notes & troubleshooting
-
-- CORS: A global CORS configuration has been added to the Spring Boot backend to allow localhost origins on any port and all paths (`/**`). If you still see CORS errors, confirm frontend is calling backend via the nginx proxy (use relative paths `/api/...`), or check response headers from the backend.
-
-- Caching / index.html: nginx is configured to serve `index.html` with `Cache-Control: no-cache` so browsers revalidate the HTML while static hashed assets are cached for a long time. If you see stale UI, clear browser cache or restart the frontend container after a deploy.
-
-- API proxy: nginx in the frontend container proxies `/api/` and `/v1/` to the backend service name used by Docker Compose `order-inventory-backend:8080`. Ensure your frontend uses relative URLs so the browser hits nginx and is proxied to backend.
-
-- Healthchecks: Compose includes basic healthchecks for services; check `docker compose ps` and `docker compose logs -f <service>` when debugging.
 
 ---
 
-For more details, see the code and documentation in the `/OrderInvertory` directory.
-
-## License
-MIT
-
----
-Built with ❤️ using React, Material UI, and Tailwind CSS.
+## 📄 License
+This project is open-source and licensed under the [MIT License](LICENSE).
