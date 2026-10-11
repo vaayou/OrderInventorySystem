@@ -4,7 +4,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --silent
 COPY . .
-ARG REACT_APP_API_URL
+ARG VITE_API_URL=https://orderinventorysystem-1y9i.onrender.com
+ARG REACT_APP_API_URL=https://orderinventorysystem-1y9i.onrender.com
+ENV VITE_API_URL=$VITE_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 RUN npm run build
 

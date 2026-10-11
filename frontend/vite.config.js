@@ -6,7 +6,16 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': 'http://localhost:8080',
+      '/api': {
+        target: 'https://orderinventorysystem-1y9i.onrender.com',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/v1': {
+        target: 'https://orderinventorysystem-1y9i.onrender.com',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 })

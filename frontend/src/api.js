@@ -1,4 +1,14 @@
-const BASE = (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_URL) ? process.env.REACT_APP_API_URL.replace(/\/$/, '') : '';
+const getBaseUrl = () => {
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL.replace(/\/$/, '');
+  }
+  if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL.replace(/\/$/, '');
+  }
+  return 'https://orderinventorysystem-1y9i.onrender.com';
+};
+
+const BASE = getBaseUrl();
 function buildUrl(url) {
   if (!url) return url;
   if (/^https?:\/\//i.test(url)) return url; // absolute URL passed
