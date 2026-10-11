@@ -9,7 +9,6 @@ import {
   DialogTitle,
   TextField,
   Typography,
-  Grid,
   Paper,
   Stack,
   Divider,
@@ -17,20 +16,12 @@ import {
   Alert,
   IconButton,
   Tooltip,
-  CircularProgress
+  CircularProgress,
+  Avatar,
+  Chip
 } from '@mui/material';
 import api from '../api';
-
-/* -------------------------------------------------------------
-   Customers Page
-   Features:
-   - List customers
-   - Create / Update / Delete
-   - Search by email & name
-   - Fetch shipment status counts
-   - View customer orders / shipments
-   - Pending, Completed, Overdue, Quantity range queries
----------------------------------------------------------------- */
+import DataViewModal from '../components/DataViewModal';
 
 export default function Customers() {
   // Core data
@@ -55,15 +46,14 @@ export default function Customers() {
   // Quantity range
   const [quantityRange, setQuantityRange] = useState({ min: '', max: '' });
 
-  // Generic result dialogs
-  const [searchDialog, setSearchDialog] = useState({ open: false, title: '', data: null });
-  const [statsDialog, setStatsDialog] = useState({ open: false, title: '', data: null });
-  const [orderDialog, setOrderDialog] = useState({ open: false, data: null });
-  const [shipmentDialog, setShipmentDialog] = useState({ open: false, data: null });
-  const [pendingDialog, setPendingDialog] = useState({ open: false, data: null });
-  const [completedDialog, setCompletedDialog] = useState({ open: false, data: null });
-  const [overdueDialog, setOverdueDialog] = useState({ open: false, data: null });
-  const [quantityDialog, setQuantityDialog] = useState({ open: false, data: null });
+  // Dedicated Rich Modals (Replacing plain JSON!)
+  const [modalState, setModalState] = useState({
+    open: false,
+    title: '',
+    type: 'generic', // 'stats', 'customers', 'orders', 'shipments', 'search'
+    badgeIcon: '📋',
+    data: null
+  });
 
   // Snackbar
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -84,7 +74,9 @@ export default function Customers() {
     }
   };
 
-  useEffect(() => { fetchCustomers(); }, []);
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
 
   // CRUD handlers
   const handleOpen = (customer = null) => {
@@ -93,14 +85,20 @@ export default function Customers() {
     setFormError({});
     setOpen(true);
   };
-  const handleClose = () => { setOpen(false); setEditing(null); };
-  const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+  const handleClose = () => {
+    setOpen(false);
+    setEditing(null);
+  };
+
+  const handleChange = (e) =>
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const validate = () => {
     const errs = {};
-    if (!form.fullName.trim()) errs.fullName = 'Full name required';
-    if (!form.emailAddress.trim()) errs.emailAddress = 'Email required';
-    else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.emailAddress)) errs.emailAddress = 'Invalid email';
+    if (!form.fullName.trim()) errs.fullName = 'Full name is required';
+    if (!form.emailAddress.trim()) errs.emailAddress = 'Email is required';
+    else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.emailAddress)) errs.emailAddress = 'Invalid email format';
     setFormError(errs);
     return Object.keys(errs).length === 0;
   };
@@ -110,10 +108,10 @@ export default function Customers() {
     try {
       if (editing) {
         await api.put('/api/v1/customers', { ...editing, ...form, customerId: editing.customerId });
-        notify('Customer updated');
-      }  else {
+        notify('Customer updated successfully');
+      } else {
         await api.post('/api/v1/customers', form);
-        notify('Customer created');
+        notify('Customer created successfully');
       }
       handleClose();
       fetchCustomers();
@@ -126,235 +124,771 @@ export default function Customers() {
     if (!deleteDialog.customerId) return;
     try {
       await api.delete(`/api/v1/customers/${deleteDialog.customerId}`);
-      notify('Customer deleted');
+      notify('Customer removed');
       setDeleteDialog({ open: false, customerId: null });
       fetchCustomers();
     } catch (e) {
-      notify(e.message || 'Delete failed', 'error');
+      notify(e.message || 'Delete operation failed', 'error');
     }
   };
 
-  // Search & actions
+  // Actions & Queries with Styled Views
   const handleSearchByEmail = async () => {
-    if (!searchEmail.trim()) return notify('Enter email', 'error');
+    if (!searchEmail.trim()) return notify('Please enter an email address', 'error');
     try {
       const data = await api.get(`/api/v1/customers/${encodeURIComponent(searchEmail.trim())}`);
-      setSearchDialog({ open: true, title: 'Search by Email', data });
+      setModalState({
+        open: true,
+        title: `Search Result: ${searchEmail.trim()}`,
+        type: 'search',
+        badgeIcon: '🔍',
+        data: data ? (Array.isArray(data) ? data : [data]) : []
+      });
     } catch (e) {
-      notify('No customer for that email', 'error');
+      notify('No customer found for that email', 'error');
     }
   };
 
   const handleSearchByName = async () => {
-    if (!searchName.trim()) return notify('Enter name', 'error');
+    if (!searchName.trim()) return notify('Please enter a name to search', 'error');
     try {
       const data = await api.get(`/api/v1/customers/name/${encodeURIComponent(searchName.trim())}`);
-      setSearchDialog({ open: true, title: 'Search by Name', data });
+      setModalState({
+        open: true,
+        title: `Search Results for "${searchName.trim()}"`,
+        type: 'search',
+        badgeIcon: '👤',
+        data: Array.isArray(data) ? data : data ? [data] : []
+      });
     } catch (e) {
-      notify('No customer(s) for that name', 'error');
+      notify('No customer(s) found matching that name', 'error');
     }
   };
 
+  // Shipment Stats Modal
   const handleShipmentStatusCount = async () => {
     try {
       const data = await api.get('/api/v1/customers/shipment/status');
-      setStatsDialog({ open: true, title: 'Shipment Status Count', data });
-    } catch (e) { notify('Failed to fetch stats', 'error'); }
+      setModalState({
+        open: true,
+        title: 'Shipment Status Distribution & Analytics',
+        type: 'stats',
+        badgeIcon: '📊',
+        data: Array.isArray(data) ? data : []
+      });
+    } catch (e) {
+      notify('Failed to load shipment statistics', 'error');
+    }
   };
 
-  const handleViewOrders = async (id) => {
-    try { setOrderDialog({ open: true, data: await api.get(`/api/v1/customers/${id}/order`) }); }
-    catch { notify('Failed to fetch orders', 'error'); }
-  };
-  const handleViewShipments = async (id) => {
-    try { setShipmentDialog({ open: true, data: await api.get(`/api/v1/customers/${id}/shipment`) }); }
-    catch { notify('Failed to fetch shipments', 'error'); }
-  };
+  // Pending Shipments Modal
   const handlePendingShipments = async () => {
-    try { setPendingDialog({ open: true, data: await api.get('/api/v1/customers/shipments/pending') }); }
-    catch { notify('Failed to fetch pending shipments', 'error'); }
+    try {
+      const data = await api.get('/api/v1/customers/shipments/pending');
+      setModalState({
+        open: true,
+        title: 'Customers with Pending Shipments',
+        type: 'customers',
+        badgeIcon: '⏳',
+        data: Array.isArray(data) ? data : []
+      });
+    } catch (e) {
+      notify('Failed to fetch pending shipments', 'error');
+    }
   };
+
+  // Completed Orders Modal
   const handleCompletedOrders = async () => {
-    try { setCompletedDialog({ open: true, data: await api.get('/api/v1/customers/orders/completed') }); }
-    catch { notify('Failed to fetch completed orders', 'error'); }
+    try {
+      const data = await api.get('/api/v1/customers/orders/completed');
+      setModalState({
+        open: true,
+        title: 'Customers with Completed Orders',
+        type: 'customers',
+        badgeIcon: '✅',
+        data: Array.isArray(data) ? data : []
+      });
+    } catch (e) {
+      notify('Failed to fetch completed orders', 'error');
+    }
   };
+
+  // Overdue Shipments Modal
   const handleOverdueShipments = async () => {
-    try { setOverdueDialog({ open: true, data: await api.get('/api/v1/customers/shipments/overdue') }); }
-    catch { notify('Failed to fetch overdue shipments', 'error'); }
+    try {
+      const data = await api.get('/api/v1/customers/shipments/overdue');
+      setModalState({
+        open: true,
+        title: 'Customers with Overdue Shipments (Urgent)',
+        type: 'customers',
+        badgeIcon: '⚠️',
+        data: Array.isArray(data) ? data : []
+      });
+    } catch (e) {
+      notify('Failed to fetch overdue shipments', 'error');
+    }
   };
+
+  // Filter by quantity range
   const handleOrderQuantityRange = async () => {
     const min = parseInt(quantityRange.min, 10);
     const max = parseInt(quantityRange.max, 10);
-    if (Number.isNaN(min) || Number.isNaN(max)) return notify('Enter min & max', 'error');
-    try { setQuantityDialog({ open: true, data: await api.get(`/api/v1/customers/orders/quantity/${min}/${max}`) }); }
-    catch { notify('Failed to fetch range', 'error'); }
+    if (Number.isNaN(min) || Number.isNaN(max)) return notify('Please provide both min and max order quantities', 'error');
+    try {
+      const data = await api.get(`/api/v1/customers/orders/quantity/${min}/${max}`);
+      setModalState({
+        open: true,
+        title: `Customers with Orders between ${min} and ${max}`,
+        type: 'customers',
+        badgeIcon: '📦',
+        data: Array.isArray(data) ? data : []
+      });
+    } catch (e) {
+      notify('Failed to fetch customers by order range', 'error');
+    }
+  };
+
+  // View individual customer's orders
+  const handleViewOrders = async (id) => {
+    try {
+      const data = await api.get(`/api/v1/customers/${id}/order`);
+      setModalState({
+        open: true,
+        title: `Customer Order Log`,
+        type: 'orders',
+        badgeIcon: '📋',
+        data
+      });
+    } catch (e) {
+      notify('Failed to load orders for this customer', 'error');
+    }
+  };
+
+  // View individual customer's shipments
+  const handleViewShipments = async (id) => {
+    try {
+      const data = await api.get(`/api/v1/customers/${id}/shipment`);
+      setModalState({
+        open: true,
+        title: `Customer Shipment History`,
+        type: 'shipments',
+        badgeIcon: '🚚',
+        data
+      });
+    } catch (e) {
+      notify('Failed to load shipments for this customer', 'error');
+    }
   };
 
   const columns = [
-    { field: 'customerId', headerName: 'ID', width: 90, headerClassName: 'text-white font-bold', cellClassName: 'text-white' },
-    { field: 'fullName', headerName: 'Full Name', flex: 1, headerClassName: 'text-white font-bold', cellClassName: 'text-white' },
-    { field: 'emailAddress', headerName: 'Email Address', flex: 1, headerClassName: 'text-white font-bold', cellClassName: 'text-white' },
+    {
+      field: 'customerId',
+      headerName: 'ID',
+      width: 90,
+      renderCell: (params) => (
+        <span style={{ color: '#818cf8', fontWeight: 700 }}>#{params.row.customerId}</span>
+      )
+    },
+    {
+      field: 'fullName',
+      headerName: 'Customer Name',
+      flex: 1.2,
+      minWidth: 180,
+      renderCell: (params) => {
+        const initials = (params.row.fullName || 'C')
+          .split(' ')
+          .map((n) => n[0])
+          .slice(0, 2)
+          .join('')
+          .toUpperCase();
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, height: '100%' }}>
+            <Avatar
+              sx={{
+                width: 32,
+                height: 32,
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #6366f1, #3b82f6)'
+              }}
+            >
+              {initials}
+            </Avatar>
+            <Typography sx={{ fontWeight: 600, color: 'white', fontSize: '0.9rem' }}>
+              {params.row.fullName}
+            </Typography>
+          </Box>
+        );
+      }
+    },
+    {
+      field: 'emailAddress',
+      headerName: 'Email Address',
+      flex: 1.5,
+      minWidth: 220,
+      renderCell: (params) => (
+        <span style={{ color: '#cbd5e1' }}>{params.row.emailAddress}</span>
+      )
+    },
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 200,
-      headerClassName: 'text-white font-bold',
+      width: 220,
+      sortable: false,
       renderCell: (params) => (
-        <div className="flex gap-1">
-          <Tooltip title="Edit"><IconButton size="small" sx={{ color: '#3b82f6' }} onClick={() => handleOpen(params.row)}>✏️</IconButton></Tooltip>
-          <Tooltip title="Delete"><IconButton size="small" sx={{ color: '#ef4444' }} onClick={() => setDeleteDialog({ open: true, customerId: params.row.customerId })}>🗑️</IconButton></Tooltip>
-          <Tooltip title="View Orders"><IconButton size="small" sx={{ color: '#10b981' }} onClick={() => handleViewOrders(params.row.customerId)}>📋</IconButton></Tooltip>
-          <Tooltip title="View Shipments"><IconButton size="small" sx={{ color: '#f59e0b' }} onClick={() => handleViewShipments(params.row.customerId)}>🚚</IconButton></Tooltip>
-        </div>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, height: '100%' }}>
+          <Tooltip title="View Orders">
+            <IconButton
+              size="small"
+              onClick={() => handleViewOrders(params.row.customerId)}
+              sx={{
+                color: '#34d399',
+                background: 'rgba(16,185,129,0.1)',
+                '&:hover': { background: 'rgba(16,185,129,0.2)' }
+              }}
+            >
+              📋
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="View Shipments">
+            <IconButton
+              size="small"
+              onClick={() => handleViewShipments(params.row.customerId)}
+              sx={{
+                color: '#fbbf24',
+                background: 'rgba(245,158,11,0.1)',
+                '&:hover': { background: 'rgba(245,158,11,0.2)' }
+              }}
+            >
+              🚚
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Edit Customer">
+            <IconButton
+              size="small"
+              onClick={() => handleOpen(params.row)}
+              sx={{
+                color: '#60a5fa',
+                background: 'rgba(59,130,246,0.1)',
+                '&:hover': { background: 'rgba(59,130,246,0.2)' }
+              }}
+            >
+              ✏️
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete Customer">
+            <IconButton
+              size="small"
+              onClick={() => setDeleteDialog({ open: true, customerId: params.row.customerId })}
+              sx={{
+                color: '#f87171',
+                background: 'rgba(239,68,68,0.1)',
+                '&:hover': { background: 'rgba(239,68,68,0.2)' }
+              }}
+            >
+              🗑️
+            </IconButton>
+          </Tooltip>
+        </Box>
       )
     }
   ];
 
   return (
-    <Box sx={{ background: 'linear-gradient(135deg, #0f172a 0%, #312e81 50%, #0f172a 100%)', minHeight: '100vh', p: 5 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, color: 'white', textShadow: '0 4px 8px rgba(156, 29, 29, 0.3)', letterSpacing: '0.5px' }}>Customer Management</Typography>
-        <Button variant="contained" onClick={() => handleOpen()} sx={{ background: 'linear-gradient(45deg, #06b6d4, #6366f1)', borderRadius: '12px', textTransform: 'none', fontWeight: 600, px: 3, py: 1.5, boxShadow: '0 8px 25px rgba(236, 236, 236, 0.4)', '&:hover': { background: 'linear-gradient(45deg, #2563eb, #4f46e5)', transform: 'translateY(-1px)' } }}>➕ Add Customer</Button>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {/* Page Header */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 2
+        }}
+      >
+        <Box>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 800,
+              color: 'white',
+              letterSpacing: '-0.02em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5
+            }}
+          >
+            <span>👥</span> Customer Management
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#94a3b8', mt: 0.5 }}>
+            Access customer accounts, audit order streams, track shipment lifecycles & analyze real-time states.
+          </Typography>
+        </Box>
+
+        <Button
+          variant="contained"
+          onClick={() => handleOpen()}
+          sx={{
+            background: 'linear-gradient(135deg, #06b6d4 0%, #6366f1 100%)',
+            borderRadius: '12px',
+            textTransform: 'none',
+            fontWeight: 700,
+            px: 3,
+            py: 1.25,
+            boxShadow: '0 4px 20px rgba(99, 102, 241, 0.4)',
+            transition: 'all 0.2s',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #0891b2 0%, #4f46e5 100%)',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 8px 25px rgba(99, 102, 241, 0.5)'
+            }
+          }}
+        >
+          ➕ Add Customer
+        </Button>
       </Box>
 
-      {/* Search & Filter Section */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid size={12}>
-          <Paper elevation={2} sx={{ background: 'rgba(250, 250, 250, 0.07)', borderRadius: '16px', p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2, color: 'white', fontWeight: 700 }}>Search & Filters</Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
-              <TextField label="Search Email" value={searchEmail} onChange={e => setSearchEmail(e.target.value)} size="small" sx={{ minWidth: 180,background: 'white',borderRadius: '10px' }} />
-              <Button variant="outlined" onClick={handleSearchByEmail} sx={{ borderRadius: '8px', textTransform: 'none', color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>Search</Button>
-              <TextField label="Search Name" value={searchName} onChange={e => setSearchName(e.target.value)} size="small" sx={{ minWidth: 180,background: 'white',borderRadius: '10px' }} />
-              <Button variant="outlined" onClick={handleSearchByName} sx={{ borderRadius: '8px', textTransform: 'none', color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>Search</Button>
-            </Stack>
-          </Paper>
-        </Grid>
-      </Grid>
+      {/* Quick Action Intelligence Cards */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          borderRadius: '20px',
+          background: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+        }}
+      >
+        <Box sx={{ mb: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'white' }}>
+              Operational Quick Actions
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#94a3b8' }}>
+              Instant reports for logistics, fulfillment status and pending delivery workflows
+            </Typography>
+          </Box>
+          <Chip
+            size="small"
+            label="Live Data"
+            sx={{
+              background: 'rgba(16,185,129,0.15)',
+              color: '#34d399',
+              border: '1px solid rgba(16,185,129,0.3)',
+              fontWeight: 700
+            }}
+          />
+        </Box>
 
-      {/* Quick Actions */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid size={12}>
-          <Paper elevation={2} sx={{ background: 'rgba(255,255,255,0.07)', borderRadius: '16px', p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2, color: 'white', fontWeight: 700 }}>Quick Actions</Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
-              <Button variant="contained" onClick={handleShipmentStatusCount} sx={{ background: 'linear-gradient(45deg, #06b6d4, #0891b2)', borderRadius: '10px', textTransform: 'none' }}>📊 Shipment Stats</Button>
-              <Button variant="contained" onClick={handlePendingShipments} sx={{ background: 'linear-gradient(45deg, #f59e0b, #d97706)', borderRadius: '10px', textTransform: 'none' }}>⏳ Pending Shipments</Button>
-              <Button variant="contained" onClick={handleCompletedOrders} sx={{ background: 'linear-gradient(45deg, #10b981, #059669)', borderRadius: '10px', textTransform: 'none' }}>✅ Completed Orders</Button>
-              <Button variant="contained" onClick={handleOverdueShipments} sx={{ background: 'linear-gradient(45deg, #ef4444, #dc2626)', borderRadius: '10px', textTransform: 'none' }}>⚠️ Overdue Shipments</Button>
-            </Stack>
-            <Divider sx={{ my: 3, borderColor: 'rgba(255,255,255,0.1)' }} />
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="end">
-              <TextField label="Min Orders" value={quantityRange.min} onChange={e => setQuantityRange(q => ({ ...q, min: e.target.value }))} size="small" type="number" sx={{ width: 120 ,background: 'white',borderRadius: '10px'}} />
-              <TextField label="Max Orders" value={quantityRange.max} onChange={e => setQuantityRange(q => ({ ...q, max: e.target.value }))} size="small" type="number" sx={{ width: 120 ,background: 'white',borderRadius: '10px'}} />
-              <Button variant="outlined" onClick={handleOrderQuantityRange} sx={{ borderRadius: '8px', textTransform: 'none', color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}>Filter by Order Qty</Button>
-            </Stack>
-          </Paper>
-        </Grid>
-      </Grid>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap" useFlexGap sx={{ mb: 3 }}>
+          <Button
+            variant="contained"
+            onClick={handleShipmentStatusCount}
+            sx={{
+              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 700,
+              px: 2.5,
+              py: 1.25,
+              boxShadow: '0 4px 15px rgba(2, 132, 199, 0.3)',
+              '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(2, 132, 199, 0.4)' }
+            }}
+          >
+            📊 Shipment Stats
+          </Button>
 
-      {/* Data Grid */}
-      <Grid container spacing={2} sx={{ minHeight: '95vh', py: 2 }}>
-        <Grid size={12}>
-          <Paper elevation={2} sx={{ background: 'rgba(255,255,255,0.07)', borderRadius: '16px', p: 3, minHeight: 300 }}>
-            <Typography variant="h6" sx={{ mb: 2, color: 'white', fontWeight: 700, textAlign: 'center' }}>Customer Database</Typography>
-            {loading ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}><CircularProgress sx={{ color: '#3b82f6' }} size={60} /></Box>
+          <Button
+            variant="contained"
+            onClick={handlePendingShipments}
+            sx={{
+              background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 700,
+              px: 2.5,
+              py: 1.25,
+              boxShadow: '0 4px 15px rgba(217, 119, 6, 0.3)',
+              '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(217, 119, 6, 0.4)' }
+            }}
+          >
+            ⏳ Pending Shipments
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleCompletedOrders}
+            sx={{
+              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 700,
+              px: 2.5,
+              py: 1.25,
+              boxShadow: '0 4px 15px rgba(5, 150, 105, 0.3)',
+              '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)' }
+            }}
+          >
+            ✅ Completed Orders
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleOverdueShipments}
+            sx={{
+              background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)',
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 700,
+              px: 2.5,
+              py: 1.25,
+              boxShadow: '0 4px 15px rgba(225, 29, 72, 0.35)',
+              '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(225, 29, 72, 0.45)' }
+            }}
+          >
+            ⚠️ Overdue Shipments
+          </Button>
+        </Stack>
+
+        <Divider sx={{ my: 2.5, borderColor: 'rgba(255,255,255,0.08)' }} />
+
+        {/* Filter by Order Quantity Range */}
+        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+          <Typography variant="body2" sx={{ color: '#94a3b8', fontWeight: 600 }}>
+            Order Volume Query:
+          </Typography>
+          <TextField
+            placeholder="Min Orders"
+            value={quantityRange.min}
+            onChange={(e) => setQuantityRange((q) => ({ ...q, min: e.target.value }))}
+            size="small"
+            type="number"
+            sx={{
+              width: 120,
+              background: 'rgba(255,255,255,0.06)',
+              borderRadius: '10px',
+              '& .MuiInputBase-input': { color: 'white' }
+            }}
+          />
+          <TextField
+            placeholder="Max Orders"
+            value={quantityRange.max}
+            onChange={(e) => setQuantityRange((q) => ({ ...q, max: e.target.value }))}
+            size="small"
+            type="number"
+            sx={{
+              width: 120,
+              background: 'rgba(255,255,255,0.06)',
+              borderRadius: '10px',
+              '& .MuiInputBase-input': { color: 'white' }
+            }}
+          />
+          <Button
+            variant="outlined"
+            onClick={handleOrderQuantityRange}
+            sx={{
+              borderRadius: '10px',
+              textTransform: 'none',
+              fontWeight: 600,
+              color: '#38bdf8',
+              borderColor: 'rgba(56, 189, 248, 0.4)',
+              '&:hover': { borderColor: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)' }
+            }}
+          >
+            Filter by Order Count
+          </Button>
+        </Box>
+      </Paper>
+
+      {/* Search Bar Panel */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          borderRadius: '20px',
+          background: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)'
+        }}
+      >
+        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'white', mb: 2 }}>
+          Customer Directory Lookup
+        </Typography>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
+          {/* Email Search */}
+          <Box sx={{ display: 'flex', gap: 1, width: { xs: '100%', md: '50%' } }}>
+            <TextField
+              placeholder="Search by exact email address..."
+              value={searchEmail}
+              onChange={(e) => setSearchEmail(e.target.value)}
+              size="small"
+              fullWidth
+              sx={{
+                background: 'rgba(255,255,255,0.06)',
+                borderRadius: '10px',
+                '& .MuiInputBase-input': { color: 'white' }
+              }}
+            />
+            <Button
+              variant="contained"
+              onClick={handleSearchByEmail}
+              sx={{
+                background: 'rgba(99, 102, 241, 0.8)',
+                borderRadius: '10px',
+                textTransform: 'none',
+                fontWeight: 600,
+                px: 2.5,
+                '&:hover': { background: '#6366f1' }
+              }}
+            >
+              Search
+            </Button>
+          </Box>
+
+          <Divider orientation="vertical" flexItem sx={{ borderColor: 'rgba(255,255,255,0.08)', display: { xs: 'none', md: 'block' } }} />
+
+          {/* Name Search */}
+          <Box sx={{ display: 'flex', gap: 1, width: { xs: '100%', md: '50%' } }}>
+            <TextField
+              placeholder="Search by customer name pattern..."
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              size="small"
+              fullWidth
+              sx={{
+                background: 'rgba(255,255,255,0.06)',
+                borderRadius: '10px',
+                '& .MuiInputBase-input': { color: 'white' }
+              }}
+            />
+            <Button
+              variant="contained"
+              onClick={handleSearchByName}
+              sx={{
+                background: 'rgba(99, 102, 241, 0.8)',
+                borderRadius: '10px',
+                textTransform: 'none',
+                fontWeight: 600,
+                px: 2.5,
+                '&:hover': { background: '#6366f1' }
+              }}
+            >
+              Search
+            </Button>
+          </Box>
+        </Stack>
+      </Paper>
+
+      {/* Customers DataGrid */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: '20px',
+          background: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          p: 3,
+          boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: 'white' }}>
+              All Customers Records
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#94a3b8' }}>
+              Showing {customers.length} registered customers in database
+            </Typography>
+          </Box>
+
+          <Button
+            size="small"
+            onClick={fetchCustomers}
+            variant="outlined"
+            sx={{
+              borderRadius: '8px',
+              color: '#94a3b8',
+              borderColor: 'rgba(255,255,255,0.15)',
+              textTransform: 'none',
+              '&:hover': { color: 'white', borderColor: 'white' }
+            }}
+          >
+            🔄 Refresh
+          </Button>
+        </Box>
+
+        <Box style={{ height: 560, width: '100%' }}>
+          {loading ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 2 }}>
+              <CircularProgress sx={{ color: '#6366f1' }} size={48} />
+              <Typography sx={{ color: '#94a3b8', fontSize: '0.9rem' }}>Connecting to customer database...</Typography>
+            </Box>
           ) : error ? (
-            <Typography sx={{ color: 'red', textAlign: 'center' }}>{error}</Typography>
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography sx={{ color: '#f87171', fontWeight: 600, mb: 2 }}>{error}</Typography>
+              <Button variant="outlined" onClick={fetchCustomers} sx={{ color: '#60a5fa', borderColor: '#60a5fa' }}>
+                Try Again
+              </Button>
+            </Box>
           ) : (
             <DataGrid
               rows={customers}
               columns={columns}
-              pageSize={20}
-              rowsPerPageOptions={[20]}
-              getRowId={row => row.customerId}
-              sx={{
-            '& .MuiDataGrid-cell, & .MuiDataGrid-columnHeader': { color: 'white' },
-            border: 'none',
-            '& .MuiDataGrid-cell': { borderColor: 'rgba(255,255,255,0.1)', color: 'white', fontWeight: 500, fontFamily: 'Inter, sans-serif', fontSize: '1rem', letterSpacing: '0.01em', background: 'rgba(30,41,59,0.7)', backdropFilter: 'blur(2px)' },
-            '& .MuiDataGrid-columnHeader': { background: 'linear-gradient(90deg, #06b6d4 0%, #a855f7 100%)', color: 'white', fontWeight: 700, fontSize: '1.1rem', textShadow: '0 2px 8px rgba(168,85,247,0.15)' },
-            '& .MuiDataGrid-row': { backgroundColor: 'rgba(255,255,255,0.02)', '&:hover': { backgroundColor: 'rgba(99,102,241,0.08)' } },
-            '& .MuiDataGrid-footerContainer': { borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.05)' },
-            '& .MuiTablePagination-root': { color: 'white' },
-            '& .MuiIconButton-root': { color: 'rgba(255,255,255,0.7)' },
-            '& .Mui-disabled': { color: 'rgba(255,255,255,0.3)' }
-              }}
+              pageSize={15}
+              rowsPerPageOptions={[10, 15, 25, 50]}
+              getRowId={(row) => row.customerId}
+              disableRowSelectionOnClick
             />
           )}
-            </Paper>
-          </Grid>
-        </Grid>
+        </Box>
+      </Paper>
 
-        {/* Add/Edit Dialog */}
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth PaperProps={{ sx: { background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(20px)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.1)' } }}>
-        <DialogTitle sx={{ color: 'white', fontWeight: 600 }}>{editing ? 'Edit Customer' : 'Add Customer'}</DialogTitle>
-        <DialogContent className="space-y-4">
-          <TextField label="Full Name" name="fullName" value={form.fullName} onChange={handleChange} autoFocus fullWidth error={!!formError.fullName} helperText={formError.fullName} sx={{ mt: 2 }} />
-          <TextField label="Email Address" name="emailAddress" value={form.emailAddress} onChange={handleChange} fullWidth error={!!formError.emailAddress} helperText={formError.emailAddress} />
+      {/* Add / Edit Customer Dialog */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: 'rgba(15, 23, 42, 0.95)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '20px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            p: 1
+          }
+        }}
+      >
+        <DialogTitle sx={{ color: 'white', fontWeight: 700, fontSize: '1.25rem' }}>
+          {editing ? '✏️ Edit Customer Profile' : '➕ Create New Customer'}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, mt: 1 }}>
+            <TextField
+              label="Full Name"
+              name="fullName"
+              value={form.fullName}
+              onChange={handleChange}
+              autoFocus
+              fullWidth
+              error={!!formError.fullName}
+              helperText={formError.fullName}
+              sx={{
+                background: 'rgba(255,255,255,0.05)',
+                borderRadius: '10px',
+                '& .MuiInputBase-input': { color: 'white' }
+              }}
+            />
+            <TextField
+              label="Email Address"
+              name="emailAddress"
+              value={form.emailAddress}
+              onChange={handleChange}
+              fullWidth
+              error={!!formError.emailAddress}
+              helperText={formError.emailAddress}
+              sx={{
+                background: 'rgba(255,255,255,0.05)',
+                borderRadius: '10px',
+                '& .MuiInputBase-input': { color: 'white' }
+              }}
+            />
+          </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 3 }}>
-          <Button onClick={handleClose} sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained" sx={{ background: 'linear-gradient(45deg, #3b82f6, #6366f1)', borderRadius: '8px', textTransform: 'none' }}>Save</Button>
+        <DialogActions sx={{ p: 3, pt: 1 }}>
+          <Button onClick={handleClose} sx={{ color: '#94a3b8' }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            sx={{
+              background: 'linear-gradient(135deg, #06b6d4 0%, #6366f1 100%)',
+              borderRadius: '10px',
+              textTransform: 'none',
+              fontWeight: 700,
+              px: 3
+            }}
+          >
+            Save Customer
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, customerId: null })} PaperProps={{ sx: { background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(20px)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.1)' } }}>
-        <DialogTitle sx={{ color: 'white', fontWeight: 600 }}>Delete Customer</DialogTitle>
-        <DialogContent><Typography sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>Are you sure you want to delete this customer? This action cannot be undone.</Typography></DialogContent>
+      <Dialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, customerId: null })}
+        PaperProps={{
+          sx: {
+            background: 'rgba(15, 23, 42, 0.95)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '20px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            p: 1
+          }
+        }}
+      >
+        <DialogTitle sx={{ color: '#fb7185', fontWeight: 700 }}>
+          Confirm Customer Deletion
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: '#cbd5e1' }}>
+            Are you sure you want to permanently delete customer #{deleteDialog.customerId}? This action cannot be reverted.
+          </Typography>
+        </DialogContent>
         <DialogActions sx={{ p: 3 }}>
-          <Button onClick={() => setDeleteDialog({ open: false, customerId: null })} sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Cancel</Button>
-          <Button onClick={handleDelete} variant="contained" sx={{ background: 'linear-gradient(45deg, #ef4444, #dc2626)', borderRadius: '8px', textTransform: 'none' }}>Delete</Button>
+          <Button onClick={() => setDeleteDialog({ open: false, customerId: null })} sx={{ color: '#94a3b8' }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDelete}
+            variant="contained"
+            sx={{
+              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              borderRadius: '10px',
+              textTransform: 'none',
+              fontWeight: 700
+            }}
+          >
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Reusable data dialogs */}
-      {([
-        { state: orderDialog, set: setOrderDialog, title: 'Customer Orders' },
-        { state: shipmentDialog, set: setShipmentDialog, title: 'Customer Shipments' },
-        { state: pendingDialog, set: setPendingDialog, title: 'Customers with Pending Shipments' },
-        { state: completedDialog, set: setCompletedDialog, title: 'Customers with Completed Orders' },
-        { state: overdueDialog, set: setOverdueDialog, title: 'Customers with Overdue Shipments' },
-        { state: quantityDialog, set: setQuantityDialog, title: 'Customers by Order Quantity Range' }
-      ]).map((d, i) => (
-        <Dialog key={i} open={d.state.open} onClose={() => d.set({ open: false, data: null })} maxWidth="md" fullWidth PaperProps={{ sx: { background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(20px)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.1)' } }}>
-          <DialogTitle sx={{ color: 'white', fontWeight: 600 }}>{d.title}</DialogTitle>
-          <DialogContent>
-            <Box sx={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', p: 2, fontFamily: 'monospace', color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.875rem', maxHeight: '400px', overflow: 'auto' }}>
-              {d.state.data ? JSON.stringify(d.state.data, null, 2) : 'No data'}
-            </Box>
-          </DialogContent>
-          <DialogActions><Button onClick={() => d.set({ open: false, data: null })} sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Close</Button></DialogActions>
-        </Dialog>
-      ))}
+      {/* Interactive Rich View Modal (Replaces ALL raw JSON output!) */}
+      <DataViewModal
+        open={modalState.open}
+        onClose={() => setModalState((m) => ({ ...m, open: false }))}
+        title={modalState.title}
+        type={modalState.type}
+        badgeIcon={modalState.badgeIcon}
+        data={modalState.data}
+        onViewOrders={(id) => handleViewOrders(id)}
+        onViewShipments={(id) => handleViewShipments(id)}
+      />
 
-      {/* Search Results Dialog */}
-      <Dialog open={searchDialog.open} onClose={() => setSearchDialog({ open: false, title: '', data: null })} maxWidth="md" fullWidth PaperProps={{ sx: { background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(20px)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.1)' } }}>
-        <DialogTitle sx={{ color: 'white', fontWeight: 600 }}>{searchDialog.title}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', p: 2, fontFamily: 'monospace', color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.875rem', maxHeight: '400px', overflow: 'auto' }}>
-            {searchDialog.data ? JSON.stringify(searchDialog.data, null, 2) : 'No results'}
-          </Box>
-        </DialogContent>
-        <DialogActions><Button onClick={() => setSearchDialog({ open: false, title: '', data: null })} sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Close</Button></DialogActions>
-      </Dialog>
-
-      {/* Stats Dialog */}
-      <Dialog open={statsDialog.open} onClose={() => setStatsDialog({ open: false, title: '', data: null })} maxWidth="xs" fullWidth PaperProps={{ sx: { background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(20px)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.1)' } }}>
-        <DialogTitle sx={{ color: 'white', fontWeight: 600 }}>{statsDialog.title}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', p: 2, fontFamily: 'monospace', color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.875rem' }}>
-            {statsDialog.data ? JSON.stringify(statsDialog.data, null, 2) : 'No data'}
-          </Box>
-        </DialogContent>
-        <DialogActions><Button onClick={() => setStatsDialog({ open: false, title: '', data: null })} sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>Close</Button></DialogActions>
-      </Dialog>
-
-      {/* Snackbar */}
-      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar(s => ({ ...s, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-        <Alert onClose={() => setSnackbar(s => ({ ...s, open: false }))} severity={snackbar.severity} sx={{ background: snackbar.severity === 'success' ? 'linear-gradient(45deg, #10b981, #059669)' : 'linear-gradient(45deg, #ef4444, #dc2626)', color: 'white', borderRadius: '12px' }}>{snackbar.message}</Alert>
+      {/* Snackbar Notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          severity={snackbar.severity}
+          sx={{
+            background: snackbar.severity === 'success' ? '#059669' : '#dc2626',
+            color: 'white',
+            borderRadius: '12px',
+            fontWeight: 600,
+            boxShadow: '0 8px 25px rgba(0,0,0,0.3)'
+          }}
+        >
+          {snackbar.message}
+        </Alert>
       </Snackbar>
     </Box>
   );

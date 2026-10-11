@@ -4,20 +4,24 @@ A production-ready, full-stack Order & Inventory Management System featuring a m
 
 ---
 
-## 🚀 Live Working Project
+## 🚀 Live Working Project & Documentation
 
-| Service | Hosting Provider | Live URL |
+| Resource | Platform | URL |
 | :--- | :--- | :--- |
 | **Frontend Application** | **Netlify** | [https://ordermanage7.netlify.app/](https://ordermanage7.netlify.app/) |
 | **Backend REST API** | **Render** | [https://orderinventorysystem-1y9i.onrender.com](https://orderinventorysystem-1y9i.onrender.com) |
 | **API Health Check** | **Render** | [https://orderinventorysystem-1y9i.onrender.com/api/health](https://orderinventorysystem-1y9i.onrender.com/api/health) |
 | **Database** | **Aiven** | Cloud-managed MySQL (SSL / TLS Encrypted) |
+| **Low-Level Design (LLD)** | **Notion** | [View LLD on Notion](https://foil-poinsettia-75d.notion.site/Order-Inventory-74bdd4829f9f4e41a25a510e7c5dd6f8) |
 
 ---
 
-## 🏗️ Architecture & Deployment
+## 📐 Architecture & Low-Level Design (LLD)
 
-The application is architected as a decoupled, multi-cloud system:
+The complete system architecture, data models, entity relationships, and service contracts are documented in detail:
+- 📖 **Low-Level Design Document (LLD)**: [https://foil-poinsettia-75d.notion.site/Order-Inventory-74bdd4829f9f4e41a25a510e7c5dd6f8](https://foil-poinsettia-75d.notion.site/Order-Inventory-74bdd4829f9f4e41a25a510e7c5dd6f8)
+
+### Multi-Cloud Architecture
 
 ```mermaid
 graph LR

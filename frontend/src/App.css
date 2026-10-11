@@ -1,100 +1,243 @@
-/*
-  App-wide custom styles for enhanced look and feel.
-  These styles complement Tailwind and Material UI for a modern, clean UI.
-*/
+/* -------------------------------------------------------------
+   Order & Inventory Management System - Global Design System
+   Modern Glassmorphic Dark & Vibrant Tech Theme
+   ------------------------------------------------------------- */
+
+:root {
+  --bg-primary: #0a0f1d;
+  --bg-secondary: #0f172a;
+  --bg-card: rgba(17, 24, 39, 0.75);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(99, 102, 241, 0.25);
+  --accent-cyan: #06b6d4;
+  --accent-indigo: #6366f1;
+  --accent-purple: #8b5cf6;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+}
 
 body {
-  background: #f3f4f6;
-  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-h2, .MuiDialogTitle-root {
-  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-  font-weight: 700;
-}
-
-/* DataGrid customizations */
-.MuiDataGrid-root {
-  border-radius: 0.75rem;
-  background: #fff;
-  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
-}
-.MuiDataGrid-columnHeaders {
-  background: #f1f5f9;
-  font-weight: 600;
-  font-size: 1rem;
-}
-.MuiDataGrid-cell {
-  font-size: 0.98rem;
-}
-.MuiDataGrid-row:hover {
-  background: #f9fafb;
-}
-
-/* Dialogs */
-.MuiDialog-paper {
-  border-radius: 1rem;
-}
-
-/* Buttons */
-.MuiButton-root {
-  border-radius: 0.5rem;
-  text-transform: none;
-  font-weight: 500;
-}
-
-/* Inputs */
-.MuiInputBase-root {
-  border-radius: 0.5rem;
-}
-
-/* Utility */
-.card {
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
-  padding: 1.5rem;
-}
-//
-
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
-  background: #f1f5f9;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgba(99, 102, 241, 0.4);
   border-radius: 4px;
 }
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.7);
+}
 
-/* Futuristic Button */
-.futuristic-btn {
-  @apply text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400;
-  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10), 0 1.5px 6px 0 rgba(0,0,0,0.08);
-  letter-spacing: 0.03em;
-  font-size: 1.15rem;
+/* Glassmorphism Card Utilities */
+.glass-panel {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.futuristic-btn:hover, .futuristic-btn:focus {
-  filter: brightness(1.15) drop-shadow(0 0 16px #fff8);
-  transform: translateY(-2px) scale(1.03) perspective(400px) rotateX(2deg);
-  box-shadow: 0 8px 32px 0 var(--tw-shadow-color,rgba(59,130,246,0.25));
-  outline: none;
+
+.glass-panel:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 12px 40px 0 rgba(99, 102, 241, 0.15);
 }
-.futuristic-btn::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 120%;
-  height: 120%;
-  background: radial-gradient(circle,rgba(255,255,255,0.12) 0%,rgba(255,255,255,0) 80%);
-  transform: translate(-50%,-50%);
-  z-index: 0;
-  pointer-events: none;
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.futuristic-btn > * {
-  position: relative;
-  z-index: 1;
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
-.futuristic-btn svg {
-  margin-right: 0.5rem;
+
+/* Gradient Text */
+.gradient-text-cyan-indigo {
+  background: linear-gradient(135deg, #06b6d4 0%, #6366f1 50%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-emerald {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-amber {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-rose {
+  background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.status-badge-pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-badge-shipped {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.status-badge-delivered {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge-overdue {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fb7185;
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  animation: pulse 2s infinite;
+}
+
+.status-badge-cancelled {
+  background: rgba(100, 116, 139, 0.2);
+  color: #94a3b8;
+  border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Material UI Overrides for Dark Glassmorphism */
+.MuiPaper-root {
+  color: #f8fafc !important;
+}
+
+.MuiDataGrid-root {
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 14px !important;
+  background: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  overflow: hidden !important;
+}
+
+.MuiDataGrid-columnHeaders {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #f1f5f9 !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.MuiDataGrid-cell {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  color: #e2e8f0 !important;
+  font-size: 0.875rem !important;
+}
+
+.MuiDataGrid-row:hover {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+}
+
+.MuiDataGrid-footerContainer {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+}
+
+.MuiTablePagination-root {
+  color: #94a3b8 !important;
+}
+
+.MuiInputBase-input {
+  color: #f8fafc !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(99, 102, 241, 0.5) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+}
+
+.MuiInputLabel-root {
+  color: #94a3b8 !important;
+}
+
+.MuiInputLabel-root.Mui-focused {
+  color: #818cf8 !important;
+}
+
+/* Glow effects */
+.glow-cyan {
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.35);
+}
+
+.glow-indigo {
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.35);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.35);
+}
+
+.glow-amber {
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);
+}
+
+.glow-rose {
+  box-shadow: 0 0 25px rgba(244, 63, 94, 0.35);
 }
