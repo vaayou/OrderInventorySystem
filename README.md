@@ -12,6 +12,8 @@ A production-ready, full-stack Order & Inventory Management System featuring a m
 | **Backend REST API** | **Render** | [https://orderinventorysystem-1y9i.onrender.com](https://orderinventorysystem-1y9i.onrender.com) |
 | **API Health Check** | **Render** | [https://orderinventorysystem-1y9i.onrender.com/api/health](https://orderinventorysystem-1y9i.onrender.com/api/health) |
 | **Database** | **Aiven** | Cloud-managed MySQL (SSL / TLS Encrypted) |
+| **Developer Portfolio** | **Lovable** | [https://pawanraj.lovable.app/](https://pawanraj.lovable.app/) |
+| **Low-Level Design (LLD)** | **Notion** | [View LLD Document](https://foil-poinsettia-75d.notion.site/Order-Inventory-74bdd4829f9f4e41a25a510e7c5dd6f8) |
 
 ---
 
@@ -163,6 +165,14 @@ cp .env.example .env
 # Start containers
 docker compose up --build -d
 ```
+
+---
+
+## 👨‍💻 Author & Portfolio
+
+- 🌐 **Portfolio**: [https://pawanraj.lovable.app/](https://pawanraj.lovable.app/)
+- 💻 **GitHub**: [@vaayou](https://github.com/vaayou)
+- 💼 **LinkedIn**: [Pawan Raj](https://www.linkedin.com/in/vaayou/)
 
 ---
 

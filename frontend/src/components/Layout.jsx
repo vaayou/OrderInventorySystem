@@ -284,12 +284,20 @@ export default function Layout() {
               </Typography>
             </Box>
 
-            <Stack direction="row" spacing={3} sx={{ fontSize: '0.85rem' }}>
+            <Stack direction="row" spacing={3} sx={{ fontSize: '0.85rem', flexWrap: 'wrap', gap: 1.5 }}>
+              <a
+                href="https://pawanraj.lovable.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 600 }}
+              >
+                Portfolio
+              </a>
               <a
                 href="https://orderinventorysystem-1y9i.onrender.com/api/v1/customers"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 600 }}
+                style={{ color: '#818cf8', textDecoration: 'none', fontWeight: 600 }}
               >
                 Render Backend
               </a>
@@ -297,7 +305,7 @@ export default function Layout() {
                 href="https://ordermanage7.netlify.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: '#818cf8', textDecoration: 'none', fontWeight: 600 }}
+                style={{ color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}
               >
                 Netlify Web App
               </a>
@@ -305,7 +313,7 @@ export default function Layout() {
                 href="https://github.com/vaayou"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}
+                style={{ color: '#cbd5e1', textDecoration: 'none', fontWeight: 600 }}
               >
                 GitHub Profile
               </a>
