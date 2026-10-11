@@ -25,7 +25,7 @@ RUN ./mvnw clean package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Install curl for healthcheck and create app user
+# Install curl (healthcheck) and keytool needs to be available (included in JRE)
 RUN apk add --no-cache curl && \
     addgroup -g 1001 -S spring && \
     adduser -u 1001 -S spring -G spring
@@ -33,11 +33,12 @@ RUN apk add --no-cache curl && \
 # Copy the built jar
 COPY --from=build /app/target/*.jar /app/app.jar
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
 # Change ownership
 RUN chown -R spring:spring /app
-
-# Switch to non-root user
-USER spring:spring
 
 EXPOSE 8080
 
@@ -45,4 +46,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
     CMD curl -f http://localhost:8080/api/health || exit 1
 
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Run entrypoint as root so keytool can write to JVM cacerts, then drops to spring via exec
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

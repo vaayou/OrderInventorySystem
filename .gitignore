@@ -1,0 +1,27 @@
+# Environment files — NEVER commit real credentials
+.env
+.env.local
+.env.production
+
+# SSL certificates and keystores
+ssl/
+*.pem
+*.p12
+*.jks
+*.crt
+*.key
+
+# Node
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

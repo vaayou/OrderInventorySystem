@@ -1,0 +1,76 @@
+# ============================================================
+# OrderInventory — Spring Boot application configuration
+# Designed for Render.com native (Maven) deployment with
+# Aiven MySQL (SSL/TLS via VERIFY_CA using ca.pem Secret File)
+#
+# Render Secret File : ca.pem  →  mount path /etc/secrets/ca.pem
+# Required env vars  : SPRING_DATASOURCE_URL
+#                      SPRING_DATASOURCE_USERNAME
+#                      SPRING_DATASOURCE_PASSWORD
+# ============================================================
+
+spring:
+  application:
+    name: OrderInventory
+
+  # -------------------------------------------------------
+  # DATA SOURCE
+  # -------------------------------------------------------
+  datasource:
+    # All three env vars MUST be set in Render → Environment.
+    # No defaults here — app will fail fast if they are missing.
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 10
+
+  # -------------------------------------------------------
+  # JPA / HIBERNATE
+  # -------------------------------------------------------
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false          # set to true locally if needed
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+  # -------------------------------------------------------
+  # ENCODING & TIMEZONE
+  # -------------------------------------------------------
+  jackson:
+    time-zone: UTC
+
+# -------------------------------------------------------
+# SERVER
+# -------------------------------------------------------
+server:
+  port: ${PORT:8080}         # Render injects $PORT automatically
+
+# -------------------------------------------------------
+# ACTUATOR
+# -------------------------------------------------------
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+# -------------------------------------------------------
+# LOGGING
+# -------------------------------------------------------
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# -------------------------------------------------------
+# LOCAL OVERRIDE PROFILE (optional)
+# Create application-local.yml and set spring.profiles.active=local
+# to use ssl/ca.pem relative path during local development.
+# -------------------------------------------------------

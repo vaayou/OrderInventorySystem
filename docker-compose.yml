@@ -1,5 +1,6 @@
 # yaml
-# Update in `docker-compose.yml` - replace the mysql and backend service blocks with this
+# Production compose — uses Aiven MySQL (external). No local DB container.
+# Requires: .env with Aiven credentials, and ./ssl/ca.p12 (converted from Aiven ca.pem)
 
 services:
   frontend:
@@ -18,34 +19,11 @@ services:
     networks:
       - order-inventory-network
     healthcheck:
-      test: [ "CMD-SHELL", "wget -qO- http://localhost/ || exit 1" ]
+      test: ["CMD-SHELL", "wget -qO- http://localhost/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
-
-  mysql:
-    image: mysql:8.0
-    container_name: order-inventory-db
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: db
-      MYSQL_USER: app_user
-      MYSQL_PASSWORD: root
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./db:/docker-entrypoint-initdb.d:ro
-    networks:
-      - order-inventory-network
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uapp_user -proot || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
 
   backend:
     build:
@@ -55,19 +33,21 @@ services:
     container_name: order-inventory-backend
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: app_user
-      SPRING_DATASOURCE_PASSWORD: root
+      # Aiven MySQL — SSL enabled (ca.p12 mounted from ./ssl/)
+      SPRING_DATASOURCE_URL: jdbc:mysql://${AIVEN_HOST}:${AIVEN_PORT}/${AIVEN_DB}?sslMode=VERIFY_CA&serverSslCert=/ssl/ca.pem&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${AIVEN_USER}
+      SPRING_DATASOURCE_PASSWORD: ${AIVEN_PASSWORD}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_SHOW_SQL: true
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQL8Dialect
+      SPRING_JPA_SHOW_SQL: false
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
       SERVER_PORT: 8080
-      JAVA_OPTS: "-Xms512m -Xmx1024m"
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    volumes:
+      # Mount the ssl/ folder containing ca.pem (read-only) — no conversion needed
+      - ./ssl:/ssl:ro
     ports:
       - "8080:8080"
-    depends_on:
-      - mysql
     networks:
       order-inventory-network:
         aliases:
@@ -82,7 +62,3 @@ services:
 networks:
   order-inventory-network:
     driver: bridge
-
-volumes:
-  mysql_data:
-    driver: local

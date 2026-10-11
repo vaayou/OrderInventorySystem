@@ -1,0 +1,21 @@
+# ============================================================
+# Local development profile override
+# Activate with: -Dspring.profiles.active=local
+# or set SPRING_PROFILES_ACTIVE=local in your IDE run config.
+#
+# Uses the relative ssl/ca.pem path for local Docker / IDE runs.
+# ============================================================
+
+spring:
+  datasource:
+    url: jdbc:mysql://mysql-113a851-vayudevops-5876.a.aivencloud.com:26007/db?sslMode=VERIFY_CA&serverSslCert=ssl/ca.pem&serverTimezone=UTC&allowPublicKeyRetrieval=true
+  jpa:
+    show-sql: true
+
+server:
+  port: 8080
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
