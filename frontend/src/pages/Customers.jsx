@@ -284,7 +284,12 @@ export default function Customers() {
     {
       field: 'customerId',
       headerName: 'ID',
-      width: 90,
+      width: 100,
+      renderHeader: () => (
+        <span style={{ color: '#38bdf8', fontWeight: 800, letterSpacing: '0.05em' }}>
+          # ID
+        </span>
+      ),
       renderCell: (params) => (
         <span style={{ color: '#818cf8', fontWeight: 700 }}>#{params.row.customerId}</span>
       )
@@ -293,7 +298,12 @@ export default function Customers() {
       field: 'fullName',
       headerName: 'Customer Name',
       flex: 1.2,
-      minWidth: 180,
+      minWidth: 200,
+      renderHeader: () => (
+        <span style={{ color: '#38bdf8', fontWeight: 800, letterSpacing: '0.05em' }}>
+          👤 Customer Name
+        </span>
+      ),
       renderCell: (params) => {
         const initials = (params.row.fullName || 'C')
           .split(' ')
@@ -325,7 +335,12 @@ export default function Customers() {
       field: 'emailAddress',
       headerName: 'Email Address',
       flex: 1.5,
-      minWidth: 220,
+      minWidth: 240,
+      renderHeader: () => (
+        <span style={{ color: '#38bdf8', fontWeight: 800, letterSpacing: '0.05em' }}>
+          ✉️ Email Address
+        </span>
+      ),
       renderCell: (params) => (
         <span style={{ color: '#cbd5e1' }}>{params.row.emailAddress}</span>
       )
@@ -335,6 +350,11 @@ export default function Customers() {
       headerName: 'Actions',
       width: 220,
       sortable: false,
+      renderHeader: () => (
+        <span style={{ color: '#38bdf8', fontWeight: 800, letterSpacing: '0.05em' }}>
+          ⚡ Actions
+        </span>
+      ),
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, height: '100%' }}>
           <Tooltip title="View Orders">
@@ -739,6 +759,41 @@ export default function Customers() {
               rowsPerPageOptions={[10, 15, 25, 50]}
               getRowId={(row) => row.customerId}
               disableRowSelectionOnClick
+              sx={{
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(15, 23, 42, 0.75)',
+                '& .MuiDataGrid-columnHeaders, & .MuiDataGrid-columnHeader, & .MuiDataGrid-columnHeadersInner, & .MuiDataGrid-container--top, & .MuiDataGrid-container--top [role="row"], & .MuiDataGrid-filler': {
+                  background: 'linear-gradient(90deg, #1e1b4b 0%, #1e293b 50%, #0f172a 100%) !important',
+                  backgroundColor: '#1e293b !important',
+                  borderBottom: '2px solid rgba(99, 102, 241, 0.4) !important',
+                  color: '#38bdf8 !important',
+                },
+                '& .MuiDataGrid-columnHeaderTitle, & .MuiDataGrid-columnHeaderTitleContainer': {
+                  color: '#38bdf8 !important',
+                  fontWeight: '800 !important',
+                  letterSpacing: '0.05em !important',
+                },
+                '& .MuiDataGrid-cell': {
+                  borderColor: 'rgba(255, 255, 255, 0.06)',
+                  color: '#f8fafc',
+                  background: 'transparent',
+                },
+                '& .MuiDataGrid-row:hover': {
+                  backgroundColor: 'rgba(99, 102, 241, 0.12) !important',
+                },
+                '& .MuiDataGrid-footerContainer': {
+                  background: '#0f172a',
+                  borderColor: 'rgba(255, 255, 255, 0.08)',
+                  color: '#94a3b8',
+                },
+                '& .MuiTablePagination-root': {
+                  color: '#94a3b8',
+                },
+                '& .MuiIconButton-root': {
+                  color: 'rgba(255, 255, 255, 0.7)',
+                },
+              }}
             />
           )}
         </Box>

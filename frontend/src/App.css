@@ -160,20 +160,45 @@ body {
 
 .MuiDataGrid-root {
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 14px !important;
-  background: rgba(15, 23, 42, 0.6) !important;
+  border-radius: 16px !important;
+  background-color: rgba(15, 23, 42, 0.75) !important;
   backdrop-filter: blur(12px) !important;
   overflow: hidden !important;
+  color: #f8fafc !important;
 }
 
-.MuiDataGrid-columnHeaders {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: #f1f5f9 !important;
-  font-weight: 700 !important;
-  font-size: 0.875rem !important;
+.MuiDataGrid-main {
+  background-color: transparent !important;
+}
+
+.MuiDataGrid-columnHeaders,
+.MuiDataGrid-columnHeader,
+.MuiDataGrid-columnHeadersInner,
+.MuiDataGrid-container--top,
+.MuiDataGrid-container--top [role="row"],
+.MuiDataGrid-filler {
+  background: linear-gradient(90deg, #1e1b4b 0%, #1e293b 50%, #0f172a 100%) !important;
+  background-color: #1e293b !important;
+  border-bottom: 2px solid rgba(99, 102, 241, 0.4) !important;
+  color: #38bdf8 !important;
+}
+
+.MuiDataGrid-columnHeaderTitle,
+.MuiDataGrid-columnHeaderTitleContainer {
+  color: #38bdf8 !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
+  letter-spacing: 0.06em !important;
+}
+
+.MuiDataGrid-sortIcon {
+  color: #38bdf8 !important;
+}
+
+.MuiDataGrid-menuIcon button,
+.MuiDataGrid-iconButtonContainer button {
+  color: #94a3b8 !important;
 }
 
 .MuiDataGrid-cell {
