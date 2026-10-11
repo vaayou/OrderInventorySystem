@@ -70,6 +70,12 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 # -------------------------------------------------------
+# CORS
+# -------------------------------------------------------
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
+
+# -------------------------------------------------------
 # LOCAL OVERRIDE PROFILE (optional)
 # Create application-local.yml and set spring.profiles.active=local
 # to use ssl/ca.pem relative path during local development.
