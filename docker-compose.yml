@@ -44,8 +44,8 @@ services:
       SERVER_PORT: 8080
       JAVA_OPTS: "-Xms256m -Xmx512m"
     volumes:
-      # Mount the ssl/ folder containing ca.pem (read-only) — no conversion needed
-      - ./ssl:/ssl:ro
+      # Mount ssl/ so ca.pem lands at /etc/secrets/ca.pem — same path as Render Secret File
+      - ./ssl:/etc/secrets:ro
     ports:
       - "8080:8080"
     networks:

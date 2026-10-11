@@ -1,8 +1,10 @@
 #!/bin/sh
 set -e
 
-# Import Aiven CA cert into JVM truststore if it exists
-CA_CERT="/ssl/ca.pem"
+# Import Aiven CA cert into JVM truststore if it exists.
+# On Render: mount ca.pem as a Secret File at /etc/secrets/ca.pem
+# Locally with Docker Compose: volume-mount ./ssl/ca.pem → /etc/secrets/ca.pem
+CA_CERT="/etc/secrets/ca.pem"
 JAVA_CACERTS="${JAVA_HOME}/lib/security/cacerts"
 
 if [ -f "$CA_CERT" ]; then
