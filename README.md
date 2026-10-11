@@ -9,7 +9,7 @@ A production-ready, full-stack Order & Inventory Management System featuring a m
 | Service | Hosting Provider | Live URL |
 | :--- | :--- | :--- |
 | **Frontend Application** | **Netlify** | [https://ordermanage7.netlify.app/](https://ordermanage7.netlify.app/) |
-| **Backend REST API** | **Render** | [(https://orderinventorysystem-1y9i.onrender.com/api/v1/customers)]([https://orderinventorysystem-1y9i.onrender.com](https://orderinventorysystem-1y9i.onrender.com/api/v1/customers)) |
+| **Backend REST API** | **Render** | [https://orderinventorysystem-1y9i.onrender.com/api/v1/customers](https://orderinventorysystem-1y9i.onrender.com](https://orderinventorysystem-1y9i.onrender.com/api/v1/customers)) |
 | **API Health Check** | **Render** | [https://orderinventorysystem-1y9i.onrender.com/api/health](https://orderinventorysystem-1y9i.onrender.com/api/health) |
 | **Database** | **Aiven** | Cloud-managed MySQL (SSL / TLS Encrypted) |
 
