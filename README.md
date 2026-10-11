@@ -19,7 +19,7 @@ A production-ready, full-stack Order & Inventory Management System featuring a m
 
 ## 🏗️ Architecture & Deployment
 
-The application is architected as a decoupled, multi-cloud system:
+The application is architected as a decoupled, multi-cloud system :
 
 ```mermaid
 graph LR
@@ -176,5 +176,4 @@ docker compose up --build -d
 
 ---
 
-## 📄 License
-This project is open-source and licensed under the [MIT License](LICENSE).
+
