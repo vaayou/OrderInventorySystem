@@ -3,6 +3,8 @@
 A production-ready, full-stack Order & Inventory Management System featuring a modern React frontend, a resilient Spring Boot RESTful backend, and a cloud-managed MySQL database with TLS/SSL encryption.
 
 ---
+<img width="1908" height="984" alt="image" src="https://github.com/user-attachments/assets/fc73e559-79cf-4f64-a067-6552cbddaafe" />
+
 
 ## 🚀 Live Working Project
 
